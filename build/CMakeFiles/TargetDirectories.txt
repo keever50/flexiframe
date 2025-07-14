@@ -1,0 +1,3 @@
+/home/martini/projects/flexiframe/build/CMakeFiles/flexiframe_test.dir
+/home/martini/projects/flexiframe/build/CMakeFiles/edit_cache.dir
+/home/martini/projects/flexiframe/build/CMakeFiles/rebuild_cache.dir
