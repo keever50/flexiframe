@@ -74,7 +74,7 @@ enum flexi_status_e flexi_intake(struct flexi_instance_s *inst, uint8_t byte)
         if (byte != FLEXI_MAGIC_START) break;
         inst->headerpos = FLEXI_FRAME_ID_LOW;
         printf("\n\rSTART %d\n\r", byte);
-        inst->sum == byte;
+        inst->sum = byte;
       break;
 
       case FLEXI_FRAME_ID_LOW:
@@ -149,11 +149,11 @@ enum flexi_status_e flexi_intake(struct flexi_instance_s *inst, uint8_t byte)
               printf("Incorrect checksum\n\r\n\r");
               break;
             }
-          printf("Publishing\n\r\n\r");
-
-          flexi_publish(inst, &inst->frame);
 
           inst->headerpos = FLEXI_FRAME_START;
+
+          printf("Publishing\n\r\n\r");
+          flexi_publish(inst, &inst->frame);
         }
       break;
 
@@ -177,7 +177,8 @@ int flexi_allocate_frame(struct flexi_instance_s *inst,
       return -2;
     }
 
-  inst->last_id++;
+  if (frame_type == FLEXI_TYPE_COMMAND)
+    inst->last_id++;
 
   /* Allocation size is data length + header before payload + checksum */
 

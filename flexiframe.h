@@ -5,8 +5,6 @@
 
 #define FLEXIFRAME_MAX_EVENTS 32
 #define FLEXIFRAME_MAX_DATA_LEN 0xff
-#define FLEXIFRAME_PREAMBLES  2
-#define FLEXIFRAME_PREAMBLE   0xAA
 
 typedef void (*flexi_event_cb)(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame);
 

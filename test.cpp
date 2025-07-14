@@ -5,46 +5,80 @@
 
 flexi_instance_s g_flex_inst;
 
-void testcb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
+#define EVENTS_FOPEN 1
+#define EVENTS_FWRITE 2
+#define EVENTS_FCLOSE 3
+
+void fs_fopen_cb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
 {
-  printf("EVENT %d for %d. frametype %d\n\r", event->event_type, event->listener_id, frame->frame_type);
+  printf("FOPEN\n\r");
+
+
 }
 
-int main ()
+void fs_fclose_cb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
+{
+  printf("FCLOSE\n\r");
+}
+
+void fs_fwrite_cb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
+{
+  printf("FWRITE\n\r");
+}
+
+int main()
 {
   flexi_init(&g_flex_inst);
 
-  flexi_register_event(&g_flex_inst, testcb, 1, 55, NULL);
-  flexi_register_event(&g_flex_inst, testcb, 3, 0xBB, NULL);
+  flexi_register_event(&g_flex_inst, fs_fopen_cb,  0, EVENTS_FOPEN,  NULL);
+  flexi_register_event(&g_flex_inst, fs_fclose_cb, 1, EVENTS_FWRITE, NULL);
+  flexi_register_event(&g_flex_inst, fs_fwrite_cb, 2, EVENTS_FCLOSE, NULL);
 
-  //flexi_unregister_event(&g_flex_inst, 1);
-
-  // uint8_t testdata[] = {
-  //   0xAA, 0xAA, 0x42, 12, 0, 0, 0xBB, 2, (uint8_t)~2, 20, 30,
-  //   2,3,6,34,2,4,   0xAA, 0xAA, 0x42, 13, 0, 0, 55, 2, (uint8_t)~2, 50, 60,
-  //   0xAA, 0xAA, 0x42, 13, 0, 0, 55, 2, 50, 60,
-  //   0xA5, 0xA2, 0x42, 13, 56, 34, 23, 74, 52,34,46,74,63,43,35, 60};
-  // for (size_t i = 0; i < sizeof(testdata); i++)
-  //   {
-  //     flexi_intake(&g_flex_inst, testdata[i]);
-  //   }
+  /* Test */
 
   uint8_t *testpacket = NULL;
-  size_t testpacket_len = 0;
-  uint8_t data[] = {50, 40};
-  flexi_allocate_frame(&g_flex_inst, &testpacket, &testpacket_len, FLEXI_TYPE_COMMAND, 55, data, sizeof(data));
+  size_t len;
+
+  uint8_t args[] = "test.txt";
+  flexi_allocate_frame(&g_flex_inst, &testpacket, &len, FLEXI_TYPE_COMMAND, EVENTS_FOPEN, args, sizeof(args));
   
-  for (size_t i = 0; i < testpacket_len; i++)
+  for (size_t i = 0; i < len; i++)
     {
       flexi_intake(&g_flex_inst, testpacket[i]);
     }
-  
-  flexi_free(&g_flex_inst, &testpacket);
 
-  // for (size_t i = 0; i < 100; i++)
-  //   {
-  //     flexi_intake(&g_flex_inst, rand());
-  //   }
+  flexi_free(&g_flex_inst, &testpacket);
 
   return 0;
 }
+
+// void testcb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
+// {
+//   printf("EVENT %d for %d. frametype %d. frameid %d\n\r", event->event_type, event->listener_id, frame->frame_type, frame->frameid);
+// }
+
+// int main ()
+// {
+//   flexi_init(&g_flex_inst);
+
+//   flexi_register_event(&g_flex_inst, testcb, 1, 55, NULL);
+//   flexi_register_event(&g_flex_inst, testcb, 3, 0xBB, NULL);
+
+//   for (size_t tries = 0; tries < 40000; tries++)
+//     {
+//       uint8_t *testpacket = NULL;
+//       size_t testpacket_len = 0;
+//       uint8_t data[] = {50, 40, 42, 2, 0, 10};
+//       flexi_allocate_frame(&g_flex_inst, &testpacket, &testpacket_len, FLEXI_TYPE_COMMAND, 55, data, sizeof(data));
+      
+//       for (size_t i = 0; i < testpacket_len; i++)
+//         {
+//           flexi_intake(&g_flex_inst, testpacket[i]);
+//         }
+      
+//       flexi_free(&g_flex_inst, &testpacket);
+//     }
+
+
+//   return 0;
+// }
