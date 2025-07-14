@@ -5,6 +5,8 @@
 
 #define FLEXIFRAME_MAX_EVENTS 32
 #define FLEXIFRAME_MAX_DATA_LEN 0xff
+#define FLEXIFRAME_PREAMBLES  2
+#define FLEXIFRAME_PREAMBLE   0xAA
 
 typedef void (*flexi_event_cb)(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame);
 
@@ -49,15 +51,22 @@ struct flexi_instance_s
   int datapos;
   bool ignore_remainder;
   struct flexi_frame_s frame;
-  uint8_t checksum;
+  uint16_t last_id;
+  uint8_t sum;
 };
-
-
 
 
 void flexi_init(struct flexi_instance_s *inst);
 
+/* Vacuums up byte per byte and fires events */
+
 enum flexi_status_e flexi_intake(struct flexi_instance_s *inst, uint8_t byte);
+
+int flexi_allocate_frame(struct flexi_instance_s *inst,
+                         uint8_t **frame_alloc, size_t *alloc_len,
+                         enum flexi_frame_type_e frame_type, uint8_t event,
+                         const uint8_t *data, size_t data_len);
+int flexi_free(struct flexi_instance_s *inst, uint8_t **frame_alloc);
 
 int flexi_register_event(struct flexi_instance_s *inst, flexi_event_cb cb, int listener_id, uint8_t event_type, void *user_data);
 int flexi_unregister_event(struct flexi_instance_s *inst, int id);
