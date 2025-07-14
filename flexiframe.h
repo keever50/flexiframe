@@ -24,13 +24,12 @@ enum flexi_status_e
 
 struct flexi_frame_s
 {
-  uint8_t start;
   uint16_t frameid;
   uint8_t frame_type;
   uint8_t event;
-  uint16_t data_len;
-  uint8_t checksum;
+  uint8_t data_len;
   uint8_t data[FLEXIFRAME_MAX_DATA_LEN];
+  uint8_t checksum;
 };
 
 struct flexi_event_s
@@ -50,6 +49,7 @@ struct flexi_instance_s
   int datapos;
   bool ignore_remainder;
   struct flexi_frame_s frame;
+  uint8_t checksum;
 };
 
 

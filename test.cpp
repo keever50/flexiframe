@@ -19,10 +19,19 @@ int main ()
 
   //flexi_unregister_event(&g_flex_inst, 1);
 
-  uint8_t testdata[] = {0xAA, 0xAA, 0x42, 12, 0, 0, 0xBB, 2, 20, 30,      0xAA, 0xAA, 0x42, 13, 0, 0, 55, 2, 50, 60};
+  uint8_t testdata[] = {
+    0xAA, 0xAA, 0x42, 12, 0, 0, 0xBB, 2, (uint8_t)~2, 20, 30,
+    2,3,6,34,2,4,   0xAA, 0xAA, 0x42, 13, 0, 0, 55, 2, (uint8_t)~2, 50, 60,
+    0xAA, 0xAA, 0x42, 13, 0, 0, 55, 2, 50, 60,
+    0xA5, 0xA2, 0x42, 13, 56, 34, 23, 74, 52,34,46,74,63,43,35, 60};
   for (size_t i = 0; i < sizeof(testdata); i++)
     {
       flexi_intake(&g_flex_inst, testdata[i]);
+    }
+
+  for (size_t i = 0; i < 100; i++)
+    {
+      flexi_intake(&g_flex_inst, rand());
     }
 
   return 0;
