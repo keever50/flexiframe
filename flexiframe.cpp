@@ -1,6 +1,5 @@
 #include "flexiframe.h"
 #include <string.h>
-#include <endian.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>
@@ -64,7 +63,7 @@ void flexi_publish(struct flexi_instance_s *inst, const struct flexi_frame_s *fr
 
 
 
-enum flexi_status_e flexi_intake(struct flexi_instance_s *inst, uint8_t byte)
+enum flexi_status_e flexi_feed(struct flexi_instance_s *inst, uint8_t byte)
 {
   inst->sum += byte;
 
@@ -104,7 +103,7 @@ enum flexi_status_e flexi_intake(struct flexi_instance_s *inst, uint8_t byte)
       case FLEXI_FRAME_DATA_LEN:
         if (byte > FLEXIFRAME_MAX_DATA_LEN)
           {
-            printf("LEN bigger than maximum data len %d/%d. Ignoring remainder", byte, FLEXIFRAME_MAX_DATA_LEN);
+            printf("LEN bigger than maximum data len %d/%d. Ignoring remainder\n\r", byte, FLEXIFRAME_MAX_DATA_LEN);
           }
 
         inst->frame.data_len = byte;
@@ -126,9 +125,12 @@ enum flexi_status_e flexi_intake(struct flexi_instance_s *inst, uint8_t byte)
       break;
       
       case FLEXI_FRAME_PAYLOAD:
-        
-        inst->frame.data[inst->datapos] = byte;
-        if (inst->datapos < FLEXIFRAME_MAX_DATA_LEN) inst->datapos++;
+        if (inst->datapos < FLEXIFRAME_MAX_DATA_LEN) {
+          inst->frame.data[inst->datapos] = byte;
+        }
+        inst->datapos++;        
+        // inst->frame.data[inst->datapos] = byte;
+        // if (inst->datapos < FLEXIFRAME_MAX_DATA_LEN) inst->datapos++;
 
         printf("PAYLOAD %d (%d / %d)\n\r", byte, inst->datapos, inst->frame.data_len);
 

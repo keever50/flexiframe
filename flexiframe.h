@@ -47,7 +47,6 @@ struct flexi_instance_s
   enum flexi_status_e state;
   int headerpos;
   int datapos;
-  bool ignore_remainder;
   struct flexi_frame_s frame;
   uint16_t last_id;
   uint8_t sum;
@@ -56,9 +55,7 @@ struct flexi_instance_s
 
 void flexi_init(struct flexi_instance_s *inst);
 
-/* Vacuums up byte per byte and fires events */
-
-enum flexi_status_e flexi_intake(struct flexi_instance_s *inst, uint8_t byte);
+enum flexi_status_e flexi_feed(struct flexi_instance_s *inst, uint8_t byte);
 
 int flexi_allocate_frame(struct flexi_instance_s *inst,
                          uint8_t **frame_alloc, size_t *alloc_len,

@@ -1,7 +1,0 @@
-{
-	"InstallScripts" : 
-	[
-		"/home/martini/projects/flexiframe/build/cmake_install.cmake"
-	],
-	"Parallel" : false
-}

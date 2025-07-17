@@ -1,3 +1,4 @@
+#ifdef FLEXIFRAME_TESTS
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -44,7 +45,7 @@ int main()
   
   for (size_t i = 0; i < len; i++)
     {
-      flexi_intake(&g_flex_inst, testpacket[i]);
+      flexi_feed(&g_flex_inst, testpacket[i]);
     }
 
   flexi_free(&g_flex_inst, &testpacket);
@@ -82,3 +83,4 @@ int main()
 
 //   return 0;
 // }
+#endif
