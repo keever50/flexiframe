@@ -1,4 +1,1 @@
-*.cmake
-CMakeFiles/
-flexiframe_test
-CMakeCache.txt
+build/

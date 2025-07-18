@@ -8,3 +8,6 @@ if(FLEXIFRAME_TESTS)
     target_compile_definitions(flexiframe_test PRIVATE FLEXIFRAME_TESTS)
     target_include_directories(flexiframe_test PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 endif()
+
+add_library(flexiframe flexiframe.cpp)
+target_include_directories(flexiframe PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

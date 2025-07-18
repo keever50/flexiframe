@@ -6,81 +6,52 @@
 
 flexi_instance_s g_flex_inst;
 
-#define EVENTS_FOPEN 1
-#define EVENTS_FWRITE 2
-#define EVENTS_FCLOSE 3
+#define EVENTS_TEST 1
 
-void fs_fopen_cb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
+void testcb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_info_s *info, const struct flexi_payload_s *payload)
 {
-  printf("FOPEN\n\r");
+  printf("Listener %d: Event %d received. Frame type %d, frame ID %d\n\r", event->listener_id, info->event, info->frame_type, info->frameid);
+  for (size_t i = 0; i < payload->len; i++)
+    {
+      printf("0x%X ", payload->data[i]);
+    }
+  printf("\n\r");
+  printf("user_data: %s\n\r", (char *)event->user_data);
 
-
+  flexi_send(&g_flex_inst, info->frameid, FLEXI_TYPE_RESPONSE, EVENTS_TEST, (uint8_t *)event->user_data, 4);
 }
 
-void fs_fclose_cb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
+int txcb(struct flexi_instance_s *inst, const uint8_t *buf, size_t len)
 {
-  printf("FCLOSE\n\r");
-}
-
-void fs_fwrite_cb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
-{
-  printf("FWRITE\n\r");
+  printf("TX>");
+  for (size_t i = 0; i < len; i++)
+    {
+      printf("0x%X ", buf[i]);
+    }
+  printf("\n\r");
+  return 0;
 }
 
 int main()
 {
   flexi_init(&g_flex_inst);
+  flexi_set_tx_cb(&g_flex_inst, txcb);
+  flexi_register_event(&g_flex_inst, testcb, 0, EVENTS_TEST, (void *)"hello!");
 
-  flexi_register_event(&g_flex_inst, fs_fopen_cb,  0, EVENTS_FOPEN,  NULL);
-  flexi_register_event(&g_flex_inst, fs_fclose_cb, 1, EVENTS_FWRITE, NULL);
-  flexi_register_event(&g_flex_inst, fs_fwrite_cb, 2, EVENTS_FCLOSE, NULL);
+  uint8_t dat[] = {5,6,7,8};
+  flexi_send(&g_flex_inst, 1, FLEXI_TYPE_COMMAND, EVENTS_TEST, dat, sizeof(dat));
 
-  /* Test */
+  /* For testing, read internal TX buffer */
 
-  uint8_t *testpacket = NULL;
-  size_t len;
-
-  uint8_t args[] = "test.txt";
-  flexi_allocate_frame(&g_flex_inst, &testpacket, &len, FLEXI_TYPE_COMMAND, EVENTS_FOPEN, args, sizeof(args));
-  
-  for (size_t i = 0; i < len; i++)
+  for (size_t i = 0; i < g_flex_inst.txlen; i++)
     {
-      flexi_feed(&g_flex_inst, testpacket[i]);
+      printf("RX<0x%X: ", g_flex_inst.txbuf[i]);
+      flexi_feed(&g_flex_inst, g_flex_inst.txbuf[i]);
     }
-
-  flexi_free(&g_flex_inst, &testpacket);
+  printf("\n\r");
 
   return 0;
 }
 
-// void testcb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_frame_s *frame)
-// {
-//   printf("EVENT %d for %d. frametype %d. frameid %d\n\r", event->event_type, event->listener_id, frame->frame_type, frame->frameid);
-// }
 
-// int main ()
-// {
-//   flexi_init(&g_flex_inst);
-
-//   flexi_register_event(&g_flex_inst, testcb, 1, 55, NULL);
-//   flexi_register_event(&g_flex_inst, testcb, 3, 0xBB, NULL);
-
-//   for (size_t tries = 0; tries < 40000; tries++)
-//     {
-//       uint8_t *testpacket = NULL;
-//       size_t testpacket_len = 0;
-//       uint8_t data[] = {50, 40, 42, 2, 0, 10};
-//       flexi_allocate_frame(&g_flex_inst, &testpacket, &testpacket_len, FLEXI_TYPE_COMMAND, 55, data, sizeof(data));
-      
-//       for (size_t i = 0; i < testpacket_len; i++)
-//         {
-//           flexi_intake(&g_flex_inst, testpacket[i]);
-//         }
-      
-//       flexi_free(&g_flex_inst, &testpacket);
-//     }
-
-
-//   return 0;
-// }
 #endif
