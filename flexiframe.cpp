@@ -68,7 +68,7 @@ void flexi_publish(struct flexi_instance_s *inst, const struct flexi_info_s *inf
 
 enum flexi_status_e flexi_feed(struct flexi_instance_s *inst, uint8_t byte)
 {
-  inst->sum += byte;
+  
 
   switch (inst->headerpos)
     {
@@ -76,7 +76,7 @@ enum flexi_status_e flexi_feed(struct flexi_instance_s *inst, uint8_t byte)
         if (byte != FLEXI_MAGIC_START) break;
         inst->headerpos = FLEXI_FRAME_ID_LOW;
         printf("\n\rSTART %d\n\r", byte);
-        inst->sum = byte;
+        inst->sum = 0;
       break;
 
       case FLEXI_FRAME_ID_LOW:
@@ -147,8 +147,8 @@ enum flexi_status_e flexi_feed(struct flexi_instance_s *inst, uint8_t byte)
 
       case FLEXI_FRAME_CHECKSUM:
         {
-          printf("CHECKSUM %d (should be %d)\n\r", byte, (uint8_t)(inst->sum - byte));
-          if (byte != (uint8_t)(inst->sum - byte))
+          printf("CHECKSUM %d (should be %d)\n\r", byte, (uint8_t)(inst->sum));
+          if (byte != (uint8_t)(inst->sum))
             {
               inst->headerpos = FLEXI_FRAME_START;
               printf("Incorrect checksum\n\r\n\r");
@@ -167,6 +167,7 @@ enum flexi_status_e flexi_feed(struct flexi_instance_s *inst, uint8_t byte)
       break;
     }
 
+  inst->sum += byte;
   return inst->state;
 }
 
