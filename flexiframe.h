@@ -16,7 +16,8 @@ enum flexi_frame_type_e
 {
   FLEXI_TYPE_COMMAND,
   FLEXI_TYPE_RESPONSE,
-  FLEXI_TYPE_ERROR
+  FLEXI_TYPE_ERROR,
+  FLEXI_TYPE_POLL
 };
 
 enum flexi_status_e
