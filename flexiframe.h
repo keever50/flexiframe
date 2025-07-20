@@ -64,6 +64,7 @@ struct flexi_instance_s
   uint16_t last_id;
   uint8_t sum;
   flexi_tx_cb tx_cb;
+  void *user;
 };
 
 
