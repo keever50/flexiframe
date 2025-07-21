@@ -34,6 +34,8 @@ int flexi_register_event(struct flexi_instance_s *inst, flexi_event_cb cb, int l
       inst->events[i].listener_id = listener_id;
       inst->events[i].user_data = user_data;
       inst->events[i].event_type = event_type;
+      inst->events[i].called = false;
+      inst->events[i].returned = 0;
       return 0;
     }
   return -1;
@@ -60,7 +62,8 @@ void flexi_publish(struct flexi_instance_s *inst, const struct flexi_info_s *inf
       struct flexi_payload_s payload;
       payload.data = inst->rxpayload;
       payload.len = info->data_len;
-      inst->events[i].cb(inst, &inst->events[i], info, &payload);
+      inst->events[i].returned = inst->events[i].cb(inst, &inst->events[i], info, &payload);
+      inst->events[i].called = true;
     }
 }
 
@@ -272,4 +275,14 @@ int flexi_send(struct flexi_instance_s *inst, uint16_t frame_id, enum flexi_fram
   inst->last_id = frame_id;
   flexi_create_static_frame(inst, type, event, data, data_len);
   return inst->tx_cb(inst, inst->txbuf, inst->txlen);
+}
+
+struct flexi_event_s *flexi_get_event(struct flexi_instance_s *inst, int id)
+{
+    for (size_t i = 0; i < FLEXIFRAME_MAX_EVENTS; i++)
+    {
+      if (inst->events[i].listener_id != id ) continue;
+      return &inst->events[i];
+    }
+  return NULL;
 }

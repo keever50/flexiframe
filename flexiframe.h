@@ -9,7 +9,7 @@
 #define FLEXIFRAME_OVERHEAD     8
 #define FLEXIFRAME_MAX_FRAME_LEN FLEXIFRAME_MAX_DATA_LEN + FLEXIFRAME_OVERHEAD
 
-typedef void (*flexi_event_cb)(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_info_s *info, const struct flexi_payload_s *payload);
+typedef int (*flexi_event_cb)(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_info_s *info, const struct flexi_payload_s *payload);
 typedef int (*flexi_tx_cb)(struct flexi_instance_s *inst, const uint8_t *buf, size_t len);
 
 enum flexi_frame_type_e
@@ -49,6 +49,8 @@ struct flexi_event_s
 //  enum flexi_frame_type_e frame_type;
   int listener_id;
   void *user_data;
+  bool called;
+  int returned;
 };
 
 struct flexi_instance_s
@@ -77,6 +79,7 @@ void flexi_set_tx_cb(struct flexi_instance_s *inst, flexi_tx_cb cb);
 int flexi_send(struct flexi_instance_s *inst, uint16_t frame_id, enum flexi_frame_type_e type, uint8_t event, const uint8_t *data, size_t data_len);
 
 int flexi_register_event(struct flexi_instance_s *inst, flexi_event_cb cb, int listener_id, uint8_t event_type, void *user_data);
+struct flexi_event_s *flexi_get_event(struct flexi_instance_s *inst, int id);
 int flexi_unregister_event(struct flexi_instance_s *inst, int id);
 
 // void flexi_publish(struct flexi_instance_s *inst, const struct flexi_info_s *frame);

@@ -8,7 +8,7 @@ flexi_instance_s g_flex_inst;
 
 #define EVENTS_TEST 1
 
-void testcb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_info_s *info, const struct flexi_payload_s *payload)
+int testcb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_info_s *info, const struct flexi_payload_s *payload)
 {
   printf("Listener %d: Event %d received. Frame type %d, frame ID %d\n\r", event->listener_id, info->event, info->frame_type, info->frameid);
   for (size_t i = 0; i < payload->len; i++)
@@ -19,6 +19,8 @@ void testcb(struct flexi_instance_s *inst, const struct flexi_event_s *event, co
   printf("user_data: %s\n\r", (char *)event->user_data);
 
   flexi_send(&g_flex_inst, info->frameid, FLEXI_TYPE_RESPONSE, EVENTS_TEST, (uint8_t *)event->user_data, 4);
+
+  return 100;
 }
 
 int txcb(struct flexi_instance_s *inst, const uint8_t *buf, size_t len)
@@ -49,6 +51,11 @@ int main()
       flexi_feed(&g_flex_inst, g_flex_inst.txbuf[i]);
     }
   printf("\n\r");
+
+  printf("CB got called %d\n\r", flexi_get_event(&g_flex_inst, 0)->called);
+  printf("CB returned %d\n\r", flexi_get_event(&g_flex_inst, 0)->returned);
+
+  flexi_unregister_event(&g_flex_inst, 0);
 
   return 0;
 }
