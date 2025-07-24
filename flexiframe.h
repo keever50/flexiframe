@@ -9,6 +9,11 @@
 #define FLEXIFRAME_OVERHEAD     8
 #define FLEXIFRAME_MAX_FRAME_LEN FLEXIFRAME_MAX_DATA_LEN + FLEXIFRAME_OVERHEAD
 
+struct flexi_payload_s;
+struct flexi_info_s;
+struct flexi_event_s;
+struct flexi_instance_s;
+
 typedef int (*flexi_event_cb)(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_info_s *info, const struct flexi_payload_s *payload);
 typedef int (*flexi_tx_cb)(struct flexi_instance_s *inst, const uint8_t *buf, size_t len);
 
