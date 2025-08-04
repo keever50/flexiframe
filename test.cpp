@@ -6,6 +6,7 @@
 
 flexi_instance_s g_flex_inst;
 
+
 #define EVENTS_TEST 1
 
 int testcb(struct flexi_instance_s *inst, const struct flexi_event_s *event, const struct flexi_info_s *info, const struct flexi_payload_s *payload)

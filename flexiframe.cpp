@@ -6,6 +6,12 @@
 
 #define FLEXI_MAGIC_START 0x42
 
+#ifdef FLEXI_CONFIG_DEBUG
+#define FLEXI_PRINTF(...)  printf(__VA_ARGS__)
+#else
+#define FLEXI_PRINTF(...)  ((void)0)
+#endif
+
 enum flexi_info_section_e
 {
   FLEXI_FRAME_START,
@@ -78,51 +84,51 @@ enum flexi_status_e flexi_feed(struct flexi_instance_s *inst, uint8_t byte)
       case FLEXI_FRAME_START:
         if (byte != FLEXI_MAGIC_START) break;
         inst->headerpos = FLEXI_FRAME_ID_LOW;
-        printf("\n\rSTART %d\n\r", byte);
+        FLEXI_PRINTF("\n\rSTART %d\n\r", byte);
         inst->sum = 0;
       break;
 
       case FLEXI_FRAME_ID_LOW:
         ((uint8_t *)&inst->info.frameid)[0] = byte;
         inst->headerpos = FLEXI_FRAME_ID_HIGH;
-        printf("IDL %d\n\r", byte);
+        FLEXI_PRINTF("IDL %d\n\r", byte);
       break;
 
       case FLEXI_FRAME_ID_HIGH:
         ((uint8_t *)&inst->info.frameid)[1] = byte;
         inst->headerpos = FLEXI_FRAME_TYPE;
-        printf("IDH %d\n\r", byte);
+        FLEXI_PRINTF("IDH %d\n\r", byte);
       break;
 
       case FLEXI_FRAME_TYPE:
         inst->info.frame_type = byte;
         inst->headerpos = FLEXI_FRAME_EVENT;
-        printf("FRAMETYPE %d\n\r", byte);
+        FLEXI_PRINTF("FRAMETYPE %d\n\r", byte);
       break;
 
       case FLEXI_FRAME_EVENT:
         inst->info.event = byte;
         inst->headerpos = FLEXI_FRAME_DATA_LEN;
-        printf("EVENT %d\n\r", byte);
+        FLEXI_PRINTF("EVENT %d\n\r", byte);
       break;
 
       case FLEXI_FRAME_DATA_LEN:
         if (byte > FLEXIFRAME_MAX_DATA_LEN)
           {
-            printf("LEN bigger than maximum data len %d/%d. Ignoring remainder\n\r", byte, FLEXIFRAME_MAX_DATA_LEN);
+            FLEXI_PRINTF("LEN bigger than maximum data len %d/%d. Ignoring remainder\n\r", byte, FLEXIFRAME_MAX_DATA_LEN);
           }
 
         inst->info.data_len = byte;
         inst->headerpos = FLEXI_FRAME_INV_DATA_LEN;
-        printf("LEN %d\n\r", byte);
+        FLEXI_PRINTF("LEN %d\n\r", byte);
       break;
 
       case FLEXI_FRAME_INV_DATA_LEN:
         {
-          printf("INVLEN %d (inverted %d)\n\r", byte, (uint8_t)~byte);
+          FLEXI_PRINTF("INVLEN %d (inverted %d)\n\r", byte, (uint8_t)~byte);
           if (inst->info.data_len != (uint8_t)~byte)
             {
-              printf("Length did not match inverted length\n\r");
+              FLEXI_PRINTF("Length did not match inverted length\n\r");
               inst->headerpos = FLEXI_FRAME_START;
               break;
             }
@@ -138,35 +144,35 @@ enum flexi_status_e flexi_feed(struct flexi_instance_s *inst, uint8_t byte)
         // inst->frame.data[inst->datapos] = byte;
         // if (inst->datapos < FLEXIFRAME_MAX_DATA_LEN) inst->datapos++;
 
-        printf("PAYLOAD %d (%d / %d)\n\r", byte, inst->datapos, inst->info.data_len);
+        FLEXI_PRINTF("PAYLOAD %d (%d / %d)\n\r", byte, inst->datapos, inst->info.data_len);
 
         if (inst->datapos >= inst->info.data_len )
           {
             inst->datapos = 0;
             inst->headerpos = FLEXI_FRAME_CHECKSUM;
-            printf("End of payload\n\r");
+            FLEXI_PRINTF("End of payload\n\r");
           }
       break;
 
       case FLEXI_FRAME_CHECKSUM:
         {
-          printf("CHECKSUM %d (should be %d)\n\r", byte, (uint8_t)(inst->sum));
+          FLEXI_PRINTF("CHECKSUM %d (should be %d)\n\r", byte, (uint8_t)(inst->sum));
           if (byte != (uint8_t)(inst->sum))
             {
               inst->headerpos = FLEXI_FRAME_START;
-              printf("Incorrect checksum\n\r\n\r");
+              FLEXI_PRINTF("Incorrect checksum\n\r\n\r");
               break;
             }
 
           inst->headerpos = FLEXI_FRAME_START;
 
-          printf("Publishing\n\r\n\r");
+          FLEXI_PRINTF("Publishing\n\r\n\r");
           flexi_publish(inst, &inst->info);
         }
       break;
 
       default:
-        printf("Unknown parser state\n\r");
+        FLEXI_PRINTF("Unknown parser state\n\r");
       break;
     }
 
@@ -182,7 +188,7 @@ int flexi_allocate_frame(struct flexi_instance_s *inst,
 
   if ((*frame_alloc) != NULL)
     {
-      printf("frame allocation was not freed or is not NULL\n\r");
+      FLEXI_PRINTF("frame allocation was not freed or is not NULL\n\r");
       return -2;
     }
 
@@ -195,10 +201,10 @@ int flexi_allocate_frame(struct flexi_instance_s *inst,
   (*frame_alloc) = (uint8_t *)malloc(len);
   if ((*frame_alloc) == NULL)
     {
-      printf("flexi malloc fail\n\r");
+      FLEXI_PRINTF("flexi malloc fail\n\r");
       return -1;
     }
-  printf("Allocated %d\n\r", len);
+  FLEXI_PRINTF("Allocated %d\n\r", len);
 
   (*alloc_len) = len;
   
@@ -226,7 +232,7 @@ int flexi_free(struct flexi_instance_s *inst, uint8_t **frame_alloc)
 {
   if ((*frame_alloc) == NULL)
     {
-      printf("frame allocation was already freed\n\r");
+      FLEXI_PRINTF("frame allocation was already freed\n\r");
       return -2;
     }
   free((*frame_alloc));
